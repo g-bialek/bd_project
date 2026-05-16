@@ -1,0 +1,64 @@
+const db = require("../db/db")
+
+const getAllGames = async(req,res) => {
+    try {
+        const [rows] = await db.query(`
+            SELECT m.id_meczu, dh.nazwa_druzyny AS 'gospodarze', da.nazwa_druzyny AS 'goscie', s.nazwa_stadionu, m.data_meczu, m.runda_rozgrywek,
+            m.gospodarze_gole, m.goscie_gole
+            FROM mecze m
+
+            JOIN druzyny dh ON m.gospodarze_id = dh.id_druzyny
+            JOIN druzyny da ON m.goscie_id = da.id_druzyny
+
+            JOIN stadiony s ON m.stadion_id = s.id_stadionu
+
+            ORDER BY m.data_meczu DESC
+        `)
+
+        res.json(rows)
+    }
+
+    catch(error){
+        console.error(error);
+
+        res.status(500).json({
+            message: "Database error"
+        });
+    }
+};
+
+const getGameByID = async(req,res) => {
+    try {
+
+        const {id} = req.params;
+
+        const [rows] = await db.query(`
+            SELECT m.id_meczu, dh.nazwa_druzyny AS 'gospodarze', da.nazwa_druzyny AS 'goscie', s.nazwa_stadionu, m.data_meczu, m.runda_rozgrywek,
+            m.gospodarze_gole, m.goscie_gole
+            FROM mecze m
+
+            JOIN druzyny dh ON m.gospodarze_id = dh.id_druzyny
+            JOIN druzyny da ON m.goscie_id = da.id_druzyny
+
+            JOIN stadiony s ON m.stadion_id = s.id_stadionu
+
+            WHERE m.id_meczu = ?
+        `, [id]);
+
+        res.json(rows)
+    }
+
+    catch(error){
+        console.error(error);
+
+        res.status(500).json({
+            message: "Database error"
+        });
+    }
+};
+
+
+module.exports = {
+    getAllGames,
+    getGameByID
+}

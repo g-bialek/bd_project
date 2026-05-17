@@ -7,6 +7,10 @@ import TeamDetailsPage from "./pages/TeamDetailsPage";
 import GamesPage from "./pages/GamesPage";
 import GameDetailPage from "./pages/GameDetailPage";
 import TablePage from "./pages/TablePage";
+import CreateGamePage from "./pages/CreateGame";
+import EditGamePage from "./pages/EditGamePage"
+import PlayersPage from "./pages/PlayersPage";
+import CreateTeamPage from "./pages/CreateTeamPage";
 
 function App(){
   return (
@@ -38,6 +42,26 @@ function App(){
           <Route
             path = "/table"
             element={<TablePage />}
+          />
+
+          <Route
+            path = "/addGame"
+            element={<CreateGamePage />}
+          />
+
+          <Route 
+            path="/games/:id/edit"
+            element={<EditGamePage />}
+          />
+
+          <Route
+              path="/players"
+              element={<PlayersPage />}
+          />
+
+          <Route
+            path="/teams/create"
+            element={<CreateTeamPage />}
           />
             
         </Routes>

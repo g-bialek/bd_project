@@ -94,7 +94,90 @@ const getTeamById = async(req,res) =>{
     }
 }
 
+const createTeam = async (req, res) => {
+
+    try {
+
+        const {
+
+            nazwa_druzyny,
+            miasto_druzyny,
+
+            nazwa_stadionu,
+            lokalizacja_stadionu,
+            pojemnosc_stadionu,
+
+            imie_trenera,
+            nazwisko_trenera,
+            narodowosc_trenera,
+            data_urodzenia_trenera
+
+        } = req.body;
+
+        const [stadionResult] = await db.query(`
+            INSERT INTO stadiony (
+                nazwa_stadionu,
+                lokalizacja_stadionu,
+                pojemnosc_stadionu
+            )
+            VALUES (?, ?, ?)
+        `, [
+            nazwa_stadionu,
+            lokalizacja_stadionu,
+            pojemnosc_stadionu
+        ]);
+
+        const stadionID = stadionResult.insertId;
+
+        const [trainerResult] = await db.query(`
+            INSERT INTO trenerzy (
+                imie_trenera,
+                nazwisko_trenera,
+                narodowosc_trenera,
+                data_urodzenia_trenera
+            )
+            VALUES (?, ?, ?, ?)
+        `, [
+            imie_trenera,
+            nazwisko_trenera,
+            narodowosc_trenera,
+            data_urodzenia_trenera
+        ]);
+
+        const trainerID = trainerResult.insertId;
+
+        const [teamResult] = await db.query(`
+            INSERT INTO druzyny (
+                nazwa_druzyny,
+                miasto_druzyny,
+                stadion,
+                trener
+            )
+            VALUES (?, ?, ?, ?)
+        `, [
+            nazwa_druzyny,
+            miasto_druzyny,
+            stadionID,
+            trainerID
+        ]);
+
+        res.status(201).json({
+            message: "Drużyna utworzona",
+            teamID: teamResult.insertId
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            message: "Database error"
+        });
+    }
+};
+
 module.exports = {
     getAllTeams,
-    getTeamById
+    getTeamById,
+    createTeam
 }

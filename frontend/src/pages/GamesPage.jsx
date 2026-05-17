@@ -2,6 +2,7 @@ import {useEffect, useState} from "react";
 import {Link} from "react-router-dom"
 
 import { getAllGames } from "../services/gameService";
+import { deleteGame } from "../services/gameService";
 
 const GamesPage = () => {
     const [games, setGames] = useState([]);
@@ -21,6 +22,31 @@ const GamesPage = () => {
         fetchGames();
     }, []);
 
+    const handleDelete = async (id) => {
+
+        const confirmed = window.confirm(
+            "Czy na pewno chcesz usunąć ten mecz?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+
+            await deleteGame(id);
+            setGames((prevGames) =>
+                prevGames.filter(
+                    (game) => game.id_meczu !== id
+                )
+            );
+
+        } catch (error) {
+
+            console.error(error);
+        }
+    };
+
     return (
         <div>
             <h1>Wszystkie mecze:</h1>
@@ -32,6 +58,10 @@ const GamesPage = () => {
                     <Link to={`/games/${game.id_meczu}`}>
                         <button>Szczegóły</button>
                     </Link>
+                    <Link to={`/games/${game.id_meczu}/edit`}>
+                        <button>Edytuj</button>
+                    </Link>
+                    <button onClick={() => handleDelete(game.id_meczu)}>Usuń</button>
                 </div>
             ))}
         </div>

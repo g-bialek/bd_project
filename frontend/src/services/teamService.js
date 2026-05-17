@@ -12,3 +12,9 @@ export const getTeamById = async (id) => {
 
     return response.data;
 };
+
+export const createTeam = async (teamData) => {
+    const response = await api.post("/teams",teamData);
+
+    return response.data;
+}

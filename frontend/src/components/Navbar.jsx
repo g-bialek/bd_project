@@ -26,6 +26,15 @@ const Navbar = () => {
                     <Link to="/table" style={{margin: "20px"}}>
                         Tabela
                     </Link>
+                    <Link to="/addGame" style={{margin: "20px"}}>
+                        Dodaj mecz
+                    </Link>
+                    <Link to="/players" style={{margin: "20px"}}>
+                        Zawodnicy
+                    </Link>
+                    <Link to="/teams/create" style={{margin: "20px"}}>
+                        Dodaj drużynę
+                    </Link>
                 </li>
 
             </ul>

@@ -31,7 +31,7 @@ const getGameByID = async(req,res) => {
         const {id} = req.params;
 
         const [gameRows] = await db.query(`
-            SELECT m.id_meczu, dh.nazwa_druzyny AS 'gospodarze', da.nazwa_druzyny AS 'goscie', s.nazwa_stadionu, m.data_meczu, m.runda_rozgrywek,
+            SELECT m.id_meczu, m.gospodarze_id, m.goscie_id, m.stadion_id,dh.nazwa_druzyny AS 'gospodarze', da.nazwa_druzyny AS 'goscie', s.nazwa_stadionu, m.data_meczu, m.runda_rozgrywek,
             m.gospodarze_gole, m.goscie_gole
             FROM mecze m
 
@@ -51,6 +51,7 @@ const getGameByID = async(req,res) => {
 
         const [refereeRow] = await db.query(`
             SELECT 
+                  r.id_sedziego,  
                   rm.rola,
                   r.imie_sedziego,
                   r.nazwisko_sedziego
@@ -59,6 +60,14 @@ const getGameByID = async(req,res) => {
 
             WHERE mecz_id = ?
         `, [id])
+
+        const sedziaGlowny = refereeRow.find(
+            (r) => r.rola === "Glowny"
+        );
+
+        const sedziaVAR = refereeRow.find(
+            (r) => r.rola === "VAR"
+        );
         
         const game = {
             id: gameRows[0].id_meczu,
@@ -66,10 +75,14 @@ const getGameByID = async(req,res) => {
             gospodarze_gole: gameRows[0].gospodarze_gole,
             goscie: gameRows[0].goscie,
             goscie_gole: gameRows[0].goscie_gole,
-            data_meczu: gameRows[0].data_meczu,
+            data_meczu: gameRows[0].data_meczu.toISOString().split("T")[0],
             runda_rozgrywek: gameRows[0].runda_rozgrywek,
             stadion: gameRows[0].nazwa_stadionu,
-
+            gospodarze_id: gameRows[0].gospodarze_id,
+            goscie_id: gameRows[0].goscie_id,
+            stadion_id: gameRows[0].stadion_id,
+            sedzia_glowny_id: sedziaGlowny?.id_sedziego || "",
+            sedzia_var_id: sedziaVAR?.id_sedziego || "",
             sedziowie: refereeRow
         }
         res.json(game)
@@ -84,8 +97,198 @@ const getGameByID = async(req,res) => {
     }
 };
 
+const createGame = async (req,res) => {
+    try {
+        const {
+            gospodarze_id,
+            goscie_id,
+            stadion_id,
+            data_meczu,
+            runda_rozgrywek,
+            gospodarze_gole,
+            goscie_gole,
+
+            sedzia_glowny_id,
+            sedzia_var_id
+        } = req.body
+
+        const [result] = await db.query(`
+            INSERT INTO mecze (
+                gospodarze_id,
+                goscie_id,
+                stadion_id,
+                data_meczu,
+                runda_rozgrywek,
+                gospodarze_gole,
+                goscie_gole
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, [
+            gospodarze_id,
+            goscie_id,
+            stadion_id,
+            data_meczu,
+            runda_rozgrywek,
+            gospodarze_gole,
+            goscie_gole
+        ]);
+
+        const mecz_id = result.insertId;
+
+        await db.query(`
+            INSERT INTO sedziowie_meczow (
+                mecz_id,
+                sedzia_id,
+                rola
+            )
+            VALUES (?, ?, ?)
+        `, [
+            mecz_id,
+            sedzia_glowny_id,
+            "Glowny"
+        ]);
+
+        await db.query(`
+            INSERT INTO sedziowie_meczow (
+                mecz_id,
+                sedzia_id,
+                rola
+            )
+            VALUES (?, ?, ?)
+        `, [
+            mecz_id,
+            sedzia_var_id,
+            "VAR"
+        ]);
+
+        res.status(201).json({
+            message: "Mecz utworzony"
+        });
+    }
+
+    catch(error){
+        console.error(error);
+
+        res.status(500).json({
+            message: "Database error"
+        });
+    }
+}
+
+const updateGame = async(req,res) => {
+    try {
+        const {
+            gospodarze_id,
+            goscie_id,
+            stadion_id,
+            data_meczu,
+            runda_rozgrywek,
+            gospodarze_gole,
+            goscie_gole,
+            sedzia_glowny_id,
+            sedzia_var_id
+        } = req.body;
+
+        const {id} = req.params
+
+        await db.query(`
+            UPDATE mecze
+            SET
+                gospodarze_id = ?,
+                goscie_id = ?,
+                stadion_id = ?,
+                data_meczu = ?,
+                runda_rozgrywek = ?,
+                gospodarze_gole = ?,
+                goscie_gole = ?
+            WHERE id_meczu = ?
+        `, [
+            gospodarze_id,
+            goscie_id,
+            stadion_id,
+            data_meczu,
+            runda_rozgrywek,
+            gospodarze_gole,
+            goscie_gole,
+            id
+        ]);
+
+         await db.query(`
+            DELETE FROM sedziowie_meczow
+            WHERE mecz_id = ?
+        `, [id]);
+
+        await db.query(`
+            INSERT INTO sedziowie_meczow (
+                mecz_id,
+                sedzia_id,
+                rola
+            )
+            VALUES (?, ?, ?)
+        `, [
+            id,
+            sedzia_glowny_id,
+            "Glowny"
+        ]);
+
+        await db.query(`
+            INSERT INTO sedziowie_meczow (
+                mecz_id,
+                sedzia_id,
+                rola
+            )
+            VALUES (?, ?, ?)
+        `, [
+            id,
+            sedzia_var_id,
+            "VAR"
+        ]);
+
+        res.json({
+            message: "Match updated"
+        });
+    }
+
+    catch(error){
+        console.error(error);
+
+        res.status(500).json({
+            message: "Database error"
+        });
+    }
+}
+
+const deleteGame = async (req,res) => {
+    try{
+        const {id} = req.params;
+
+        await db.query(`
+            DELETE FROM sedziowie_meczow WHERE mecz_id = ?  
+        `, [id]);
+
+        await db.query(`
+            DELETE FROM mecze
+            WHERE id_meczu = ?
+        `, [id]);
+
+        res.json({
+            message: "Mecz usuniety"
+        });
+    }
+
+    catch(error){
+        console.error(error);
+        res.status(500).json({
+            message: "Database error"
+        });
+    }
+}
+
 
 module.exports = {
     getAllGames,
-    getGameByID
+    getGameByID,
+    createGame,
+    updateGame,
+    deleteGame
 }

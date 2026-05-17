@@ -31,5 +31,26 @@ services:
     depends_on:
       - db
 
+  frontend:
+    build: ./frontend
+    container_name: football-frontend
+
+    restart: always
+
+    ports:
+      - "5173:5173"
+
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+    depends_on:
+      - backend
+      - db
+
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+
 volumes:
   mariadb_data:

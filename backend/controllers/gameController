@@ -3,14 +3,12 @@ const db = require("../db/db")
 const getAllGames = async(req,res) => {
     try {
         const [rows] = await db.query(`
-            SELECT m.id_meczu, dh.nazwa_druzyny AS 'gospodarze', da.nazwa_druzyny AS 'goscie', s.nazwa_stadionu, m.data_meczu, m.runda_rozgrywek,
+            SELECT m.id_meczu, dh.nazwa_druzyny AS 'gospodarze', da.nazwa_druzyny AS 'goscie', m.data_meczu,
             m.gospodarze_gole, m.goscie_gole
             FROM mecze m
 
             JOIN druzyny dh ON m.gospodarze_id = dh.id_druzyny
             JOIN druzyny da ON m.goscie_id = da.id_druzyny
-
-            JOIN stadiony s ON m.stadion_id = s.id_stadionu
 
             ORDER BY m.data_meczu DESC
         `)
@@ -32,7 +30,7 @@ const getGameByID = async(req,res) => {
 
         const {id} = req.params;
 
-        const [rows] = await db.query(`
+        const [gameRows] = await db.query(`
             SELECT m.id_meczu, dh.nazwa_druzyny AS 'gospodarze', da.nazwa_druzyny AS 'goscie', s.nazwa_stadionu, m.data_meczu, m.runda_rozgrywek,
             m.gospodarze_gole, m.goscie_gole
             FROM mecze m
@@ -45,7 +43,36 @@ const getGameByID = async(req,res) => {
             WHERE m.id_meczu = ?
         `, [id]);
 
-        res.json(rows)
+        if(gameRows.length === 0){
+            return res.status(404).json({
+                message: "Nie znaleziono meczu!"
+            });
+        }
+
+        const [refereeRow] = await db.query(`
+            SELECT 
+                  rm.rola,
+                  r.imie_sedziego,
+                  r.nazwisko_sedziego
+            FROM sedziowie_meczow rm
+            JOIN sedziowie r ON rm.sedzia_id = r.id_sedziego
+
+            WHERE mecz_id = ?
+        `, [id])
+        
+        const game = {
+            id: gameRows[0].id_meczu,
+            gospodarze: gameRows[0].gospodarze,
+            gospodarze_gole: gameRows[0].gospodarze_gole,
+            goscie: gameRows[0].goscie,
+            goscie_gole: gameRows[0].goscie_gole,
+            data_meczu: gameRows[0].data_meczu,
+            runda_rozgrywek: gameRows[0].runda_rozgrywek,
+            stadion: gameRows[0].nazwa_stadionu,
+
+            sedziowie: refereeRow
+        }
+        res.json(game)
     }
 
     catch(error){

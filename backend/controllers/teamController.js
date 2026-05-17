@@ -56,7 +56,9 @@ const getTeamById = async(req,res) =>{
                 imie_zawodnika,
                 nazwisko_zawodnika,
                 pozycja_zawodnika,
-                numer_zawodnika
+                numer_zawodnika,
+                data_urodzenia_zawodnika,
+                narodowosc_zawodnika
             FROM zawodnicy
             WHERE druzyna_zawodnika = ?  
         `, [id]);
@@ -64,7 +66,7 @@ const getTeamById = async(req,res) =>{
         const team = {
             id: teamRows[0].id_druzyny,
             name: teamRows[0].nazwa_druzyny,
-            city: teamRows[0].miasto_druzyny.city,
+            city: teamRows[0].miasto_druzyny,
 
             coach: {
                 firstName: teamRows[0].imie_trenera,

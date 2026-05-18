@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 
 import { createTeam } from "../services/teamService";
 
+import {upsertTeamInfo} from "../services/teamInfoService"
+
 const CreateTeamPage = () => {
 
     const navigate = useNavigate();
@@ -20,7 +22,10 @@ const CreateTeamPage = () => {
         imie_trenera: "",
         nazwisko_trenera: "",
         narodowosc_trenera: "",
-        data_urodzenia_trenera: ""
+        data_urodzenia_trenera: "",
+
+        description: "",
+        founded: ""
 
     });
 
@@ -37,8 +42,14 @@ const CreateTeamPage = () => {
         e.preventDefault();
 
         try {
-
-            await createTeam(formData);
+            const createdTeam =  await createTeam(formData);
+            console.log(createdTeam)
+            await upsertTeamInfo(
+                createdTeam.teamID, {
+                    description: formData.description,
+                    founded: Number(formData.founded)
+                }
+            )
 
             navigate("/");
 
@@ -130,6 +141,23 @@ const CreateTeamPage = () => {
                     type="date"
                     name="data_urodzenia_trenera"
                     value={formData.data_urodzenia_trenera}
+                    onChange={handleChange}
+                />
+
+                <h3>Informacje o klubie</h3>
+
+                <input
+                    type="number"
+                    name="founded"
+                    placeholder="Rok założenia"
+                    value={formData.founded}
+                    onChange={handleChange}
+                />
+
+                <textarea
+                    name="description"
+                    placeholder="Opis klubu"
+                    value={formData.description}
                     onChange={handleChange}
                 />
 

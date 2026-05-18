@@ -14,6 +14,16 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./database:/docker-entrypoint-initdb.d
+
+  mongodb:
+    image: mongo:latest
+    container_name: football-mongo
+
+    ports:
+      - "27017:27017"
+    
+    volumes:
+      - mongodb_data:/data/db
   
   backend:
     build: ./backend
@@ -30,6 +40,7 @@ services:
     
     depends_on:
       - db
+      - mongodb
 
   frontend:
     build: ./frontend
@@ -47,6 +58,7 @@ services:
     depends_on:
       - backend
       - db
+      - mongodb
 
     environment:
       CHOKIDAR_USEPOLLING: "true"
@@ -54,3 +66,4 @@ services:
 
 volumes:
   mariadb_data:
+  mongodb_data:

@@ -1,11 +1,14 @@
 import {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import { getTeamById } from "../services/teamService";
+import { getTeamInfo } from "../services/teamInfoService";
 
 const TeamDetailsPage = () => {
     const {id} = useParams();
 
     const [team, setTeam] = useState(null);
+
+    const [teamInfo, setTeamInfo] = useState(null);
 
     useEffect(() => {
         const fetchTeam = async () =>{
@@ -20,7 +23,23 @@ const TeamDetailsPage = () => {
             }
         };
 
+        const fetchTeamInfo = async () => {
+
+            try {
+
+                const data = await getTeamInfo(id);
+
+                setTeamInfo(data);
+
+            } catch (error) {
+
+                console.error(error);
+            }
+        };
+
         fetchTeam();
+        fetchTeamInfo();
+
     }, [id]); 
 
     if(!team){
@@ -33,6 +52,33 @@ const TeamDetailsPage = () => {
             <h2>Miasto: {team.city}</h2>
             <h2>Trener: {team.coach.firstName} {team.coach.lastName}</h2>
             <h2>Stadion: {team.stadium.name}, {team.stadium.city}. Pojemność: {team.stadium.capacity}</h2>
+
+            {teamInfo && (
+
+                <div>
+
+                    <h2>Informacje o klubie</h2>
+
+                    <p>
+
+                        <strong>Rok założenia:</strong>
+
+                        {" "}
+                        {teamInfo.founded}
+
+                    </p>
+
+                    <p>
+
+                        <strong>Opis:</strong>
+
+                        {" "}
+                        {teamInfo.description}
+
+                    </p>
+
+                </div>
+            )}
 
             <h2>Zawodnicy:</h2>
             <table>

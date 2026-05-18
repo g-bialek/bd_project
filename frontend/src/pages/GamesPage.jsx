@@ -52,7 +52,7 @@ const GamesPage = () => {
             <h1>Wszystkie mecze:</h1>
 
             {games.map((game) => (
-                <div key={game.id_meczu}>
+                <div className="page-container" key={game.id_meczu}>
                     <h2>{game.gospodarze} | {game.gospodarze_gole} : {game.goscie_gole} | {game.goscie}</h2>
                     <h3>{game.data_meczu.slice(0,10)}</h3>
                     <Link to={`/games/${game.id_meczu}`}>

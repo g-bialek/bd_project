@@ -39,7 +39,7 @@ const PlayersPage = () => {
                 Szukaj
             </button>
 
-            <div>
+            <div className="player-card">
 
                 {players.map((player) => (
 

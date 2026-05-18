@@ -30,7 +30,7 @@ const GameDetailPage = () => {
     }
 
     return (
-        <div>
+        <div className="page-container">
             <h1>{game.gospodarze} | {game.gospodarze_gole} : {game.goscie_gole} | {game.goscie}</h1>
             <h2>Miejsce meczu: {game.stadion}</h2>
             <h2>Runda rozgrywek: {game.runda_rozgrywek}</h2>

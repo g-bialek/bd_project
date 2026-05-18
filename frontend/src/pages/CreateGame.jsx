@@ -95,7 +95,7 @@ const CreateGamePage = () => {
     }, [])
 
     return (
-        <div>
+        <div className="page-container">
             <h1>Dodaj mecz</h1>
             <div>
                 <form onSubmit={handleSubmit}>

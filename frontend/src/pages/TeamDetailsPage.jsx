@@ -28,7 +28,7 @@ const TeamDetailsPage = () => {
     }
 
     return(
-        <div>
+        <div className="page-container">
             <h1>Drużyna: {team.name}</h1>
             <h2>Miasto: {team.city}</h2>
             <h2>Trener: {team.coach.firstName} {team.coach.lastName}</h2>

@@ -48,7 +48,7 @@ const GamesPage = () => {
     };
 
     return (
-        <div>
+        <div className="page-container">
             <h1>Wszystkie mecze:</h1>
 
             {games.map((game) => (

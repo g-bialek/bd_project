@@ -22,7 +22,7 @@ const TablePage = () => {
     }, []);
 
     return (
-        <div>
+        <div className="page-container">
             <h1>Tabela Ligowa:</h1>
             <table>
                 <thead>

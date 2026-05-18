@@ -24,7 +24,7 @@ const PlayersPage = () => {
 
     return (
 
-        <div>
+        <div className="page-container">
 
             <h1>Wyszukiwarka zawodników</h1>
 

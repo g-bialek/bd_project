@@ -130,7 +130,7 @@ const EditGamePage = () => {
     }, [id])
 
     return (
-        <div>
+        <div className="page-container">
             <h1>Edytuj mecz</h1>
             <div>
                 <form onSubmit={handleSubmit}>

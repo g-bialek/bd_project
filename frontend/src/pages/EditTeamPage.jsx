@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 import { useNavigate } from "react-router-dom";
 
-import { createTeam } from "../services/teamService";
+import { editTeam } from "../services/teamService";
+import { getTeamById } from "../services/teamService";
 
-const CreateTeamPage = () => {
+const EditTeamPage = () => {
 
     const navigate = useNavigate();
+    const {id} = useParams();
 
     const [formData, setFormData] = useState({
 
@@ -24,6 +27,40 @@ const CreateTeamPage = () => {
 
     });
 
+    useEffect(() => {
+
+    const fetchTeam = async () => {
+
+        try {
+
+            const teamData = await getTeamById(id);
+
+            console.log(teamData)
+
+            setFormData({
+
+                ...teamData,
+
+                pojemnosc_stadionu: String(
+                    teamData.pojemnosc_stadionu
+                ),
+
+                data_urodzenia_trenera:
+                new Date(teamData.data_urodzenia_trenera)
+                    .toISOString()
+                    .split("T")[0]
+                });
+
+        } catch (error) {
+
+            console.error(error);
+        }
+    };
+
+    fetchTeam();
+
+}, [id]);
+
     const handleChange = (e) => {
 
         setFormData({
@@ -37,10 +74,12 @@ const CreateTeamPage = () => {
         e.preventDefault();
 
         try {
-
-            await createTeam(formData);
-
-            navigate("/");
+            console.log("Befoer edit")
+            await editTeam(id, formData);
+            console.log("After edit")
+            console.log("Befoer navigate")
+            navigate(`/teams/${id}`);
+            console.log("After navigate")
 
         } catch (error) {
 
@@ -52,7 +91,7 @@ const CreateTeamPage = () => {
 
         <div className="page-container">
 
-            <h1>Dodaj drużynę</h1>
+            <h1>Edytuj drużynę</h1>
 
             <form onSubmit={handleSubmit}>
 
@@ -134,7 +173,7 @@ const CreateTeamPage = () => {
                 />
 
                 <button type="submit">
-                    Dodaj drużynę
+                    Edytuj drużynę
                 </button>
 
             </form>
@@ -143,4 +182,4 @@ const CreateTeamPage = () => {
     );
 };
 
-export default CreateTeamPage;
+export default EditTeamPage;

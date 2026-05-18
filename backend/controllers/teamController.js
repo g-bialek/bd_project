@@ -31,6 +31,8 @@ const getTeamById = async(req,res) =>{
                 
                 t.imie_trenera,
                 t.nazwisko_trenera,
+                t.narodowosc_trenera,
+                t.data_urodzenia_trenera,
 
                 s.nazwa_stadionu,
                 s.lokalizacja_stadionu,
@@ -66,18 +68,29 @@ const getTeamById = async(req,res) =>{
         const team = {
             id: teamRows[0].id_druzyny,
             name: teamRows[0].nazwa_druzyny,
+            nazwa_druzyny: teamRows[0].nazwa_druzyny,
             city: teamRows[0].miasto_druzyny,
+            miasto_druzyny: teamRows[0].miasto_druzyny,
 
             coach: {
                 firstName: teamRows[0].imie_trenera,
                 lastName: teamRows[0].nazwisko_trenera,
             },
 
+            imie_trenera: teamRows[0].imie_trenera,
+            nazwisko_trenera: teamRows[0].nazwisko_trenera,
+            narodowosc_trenera: teamRows[0].narodowosc_trenera,
+            data_urodzenia_trenera: teamRows[0].data_urodzenia_trenera,
+
             stadium: {
                 name: teamRows[0].nazwa_stadionu,
                 city: teamRows[0].lokalizacja_stadionu,
                 capacity: teamRows[0].pojemnosc_stadionu
             },
+
+            nazwa_stadionu: teamRows[0].nazwa_stadionu,
+            lokalizacja_stadionu: teamRows[0].lokalizacja_stadionu,
+            pojemnosc_stadionu: teamRows[0].pojemnosc_stadionu,
 
             players: playersRow
         }
@@ -176,8 +189,129 @@ const createTeam = async (req, res) => {
     }
 };
 
+const updateTeam = async (req,res) => {
+    try {
+        const {id} = req.params;
+
+        const {
+            nazwa_druzyny,
+            miasto_druzyny,
+
+            nazwa_stadionu,
+            lokalizacja_stadionu,
+            pojemnosc_stadionu,
+
+            imie_trenera,
+            nazwisko_trenera,
+            narodowosc_trenera,
+            data_urodzenia_trenera
+        } = req.body
+
+        const [teamRows] = await db.query(`
+            SELECT 
+                stadion,
+                trener
+            FROM druzyny
+            WHERE id_druzyny = ?  
+        `, [id]);
+
+        if(teamRows.length === 0){
+             return res.status(404).json({
+                message: "Drużyna nie istnieje"
+            });
+        }
+
+        const stadionID = teamRows[0].stadion;
+        const trenerID = teamRows[0].trener;
+
+        await db.query(`
+            UPDATE druzyny 
+            SET 
+                nazwa_druzyny = ?,
+                miasto_druzyny = ?
+            WHERE id_druzyny = ?
+        `, [nazwa_druzyny, miasto_druzyny, id]);
+
+        await db.query(`
+            UPDATE stadiony
+            SET 
+                nazwa_stadionu = ?,
+                lokalizacja_stadionu = ?,
+                pojemnosc_stadionu = ?
+            WHERE id_stadionu = ?    
+        `, [nazwa_stadionu, lokalizacja_stadionu, pojemnosc_stadionu, stadionID])
+
+        await db.query(`
+            UPDATE trenerzy
+            SET
+                imie_trenera = ?,
+                nazwisko_trenera = ?,
+                narodowosc_trenera = ?,
+                data_urodzenia_trenera = ?
+            WHERE id_trenera = ?    
+        `, [imie_trenera, nazwisko_trenera, narodowosc_trenera, data_urodzenia_trenera, trenerID]);
+
+        res.json({
+            message: "Edytowano drużyne"
+        })
+    }
+
+    catch(error){
+        
+        console.error(error);
+
+        res.status(500).json({
+            message: "Database error"
+        });
+    }
+}
+
+const deleteTeam = async (req,res) => {
+    try {
+        const {id} = req.params;
+
+        const [gameRows] = await db.query(`
+            SELECT id_meczu
+            FROM mecze
+            WHERE 
+                gospodarze_id = ?
+                OR goscie_id = ?
+        `, [id,id]);
+
+        if(gameRows.length > 0){
+            return res.status(400).json({
+                message: "Nie można usunąć drużyny posiadającej mecze"
+            });
+        }
+
+        await db.query(`
+            DELETE FROM zawodnicy
+            WHERE druzyna_zawodnika = ?
+        `, [id]);
+
+        await db.query(`
+            DELETE FROM druzyny
+            WHERE id_druzyny = ?    
+        `, [id])
+
+        res.json({
+            message: "Drużyna usunięta"
+        });
+    }
+
+    catch (error){
+        console.error(error);
+
+        res.status(500).json({
+            message: "Database error"
+        });
+    }
+}
+
 module.exports = {
     getAllTeams,
     getTeamById,
-    createTeam
+    createTeam,
+    updateTeam,
+    deleteTeam
 }

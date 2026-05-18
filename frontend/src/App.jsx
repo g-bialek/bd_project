@@ -11,62 +11,69 @@ import CreateGamePage from "./pages/CreateGame";
 import EditGamePage from "./pages/EditGamePage"
 import PlayersPage from "./pages/PlayersPage";
 import CreateTeamPage from "./pages/CreateTeamPage";
+import EditTeamPage from "./pages/EditTeamPage";
 
 function App(){
   return (
-    <BrowserRouter>
+    <div className="app-container">
+      <BrowserRouter>
 
-        <Navbar />
+          <Navbar />
 
-        <Routes>
-          <Route 
-            path = "/"
-            element = {<TeamsPage />}
-          />
+          <Routes>
+            <Route 
+              path = "/"
+              element = {<TeamsPage />}
+            />
 
-          <Route 
-            path = "/teams/:id"
-            element={<TeamDetailsPage />}
-          />
+            <Route 
+              path = "/teams/:id"
+              element={<TeamDetailsPage />}
+            />
 
-          <Route 
-            path = "/games"
-            element={<GamesPage />}
-          />
+            <Route 
+              path = "/games"
+              element={<GamesPage />}
+            />
 
-          <Route 
-            path = "/games/:id"
-            element={<GameDetailPage />}
-          />
+            <Route 
+              path = "/games/:id"
+              element={<GameDetailPage />}
+            />
 
-          <Route
-            path = "/table"
-            element={<TablePage />}
-          />
+            <Route
+              path = "/table"
+              element={<TablePage />}
+            />
 
-          <Route
-            path = "/addGame"
-            element={<CreateGamePage />}
-          />
+            <Route
+              path = "/addGame"
+              element={<CreateGamePage />}
+            />
 
-          <Route 
-            path="/games/:id/edit"
-            element={<EditGamePage />}
-          />
+            <Route 
+              path="/games/:id/edit"
+              element={<EditGamePage />}
+            />
 
-          <Route
-              path="/players"
-              element={<PlayersPage />}
-          />
+            <Route
+                path="/players"
+                element={<PlayersPage />}
+            />
 
-          <Route
-            path="/teams/create"
-            element={<CreateTeamPage />}
-          />
-            
-        </Routes>
-    </BrowserRouter>
-    
+            <Route
+              path="/teams/create"
+              element={<CreateTeamPage />}
+            />
+
+            <Route
+              path="/teams/:id/edit"
+              element={<EditTeamPage />}
+            />
+
+          </Routes>
+      </BrowserRouter>
+    </div>
   );
 }
 
